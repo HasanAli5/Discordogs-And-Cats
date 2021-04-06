@@ -1,4 +1,4 @@
-# ![Image](https://raw.githubusercontent.com/Galtzed/Discordogs-And-Cats/main/ReadMe/discordogs%2Bcats.png?token=AMISCIYWMV6STOEGLS4B7KTANPE3S)
+# ![Image](https://github.com/Galtzed/Discordogs-And-Cats/blob/main/ReadMe/discordogs%2Bcats.png)
 A Discord Bot that uses:
 * [Dog Ceo Api](https://dog.ceo/api)
 * [Cat As A Service](https://cataas.com)
