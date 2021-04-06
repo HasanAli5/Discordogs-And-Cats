@@ -27,4 +27,4 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install discord.js
     - run: npm install node-fetch
-    - run: node run.bat
+    - run: node index.js
