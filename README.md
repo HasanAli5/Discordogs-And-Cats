@@ -1,2 +1,5 @@
 # Discordogs-Cats-
-A Discord Bot that uses 
+![Image]()
+A Discord Bot that uses:
+* [Dog Ceo Api](https://dog.ceo/api)
+* []
