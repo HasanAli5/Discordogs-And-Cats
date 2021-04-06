@@ -4,7 +4,7 @@ A Discord Bot that uses:
 * [Cat As A Service](https://cataas.com)
 
 ## Dependencies
-This Bot NEEDS [Node.js](https://nodejs.org/en/)
+This Bot NEEDS [Node.js](https://nodejs.org/en/).
 
 ## Running
-To run the bot you just need to run the `run.bat`
+To run the bot you just need to run the `run.bat` file.
