@@ -1,4 +1,4 @@
 {
-    "prefix":"+",
-    "token":"Your Token Here"
+    "token":"puttokenhere",
+    "clientId": "putbotclientidhere"
 }

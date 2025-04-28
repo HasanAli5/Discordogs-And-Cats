@@ -1,120 +1,98 @@
-const Discord = require('discord.js');
-const fetch = require('node-fetch');
-const fs = require('fs')
+const {SlashCommandBuilder,EmbedBuilder} = require('discord.js');
+
 module.exports =
 {
-    name:'dog',
-    usage:'{sub-breed} {breed} || {breed}',
-    description:'To Satisfy Your **Dog** Image Needs!',
-    async execute(message,args)
+    data: new SlashCommandBuilder()
+    .setName('dog')
+    .setDescription('To Satisfy Your **Dog** Image Needs!')
+    .addStringOption(option =>
+        option
+            .setName('breed')
+            .setDescription('Breed of Dog')
+            .setRequired(true)
+        )
+    .addStringOption(option =>
+        option
+        .setName('sub-breed')
+        .setDescription('Sub-breed of Dog')
+    ),
+    async execute(interaction,args)
     {
         var error = false
-        if (args[1] == undefined){
-            var dogger = await fetch(`https://dog.ceo/api/breed/${args[0]}/images/random`)
+        const breed = interaction.options.getString('breed') ?? undefined;
+        const sub_breed = interaction.options.getString('sub-breed') ?? undefined;
+        if (sub_breed == undefined){
+            var dogger = await fetch(`https://dog.ceo/api/breed/${breed}/images/random`)
             .then(response => response.json());
         }else{
-            var dogger = await fetch(`https://dog.ceo/api/breed/${args[1]}/${args[0]}/images/random`)
+            var dogger = await fetch(`https://dog.ceo/api/breed/${breed}/${sub_breed}/images/random`)
             .then(response => response.json());
         }
 
         const dogpic = dogger['message'];
-        if (dogpic.startsWith('http')){
-            error = false;
-        }else{
-            error=true;
+        const code = dogger['code'];
+
+        if (code==404){
+            error = true;
         }
 
         if (error === false){
-            const dogembed = new Discord.MessageEmbed()
+            const dogembed = new EmbedBuilder()
                 .setColor('#FFC0CB')
-                .setTitle(`${args[0].replace(/^\w/, (c) => c.toUpperCase())} Dog`)
+                .setTitle(`${sub_breed!=undefined?`${sub_breed} `:"\u200B"}${breed} dog`)
                 .setURL(dogpic)
-                .setFooter('Dog Command  •  This Bot Uses https://dog.ceo/api/')
+                .setFooter({text:'Dog Command  •  This Bot Uses https://dog.ceo/api/'})
                 .setImage(dogpic)
                 .setTimestamp();
 
-            message.channel.send({embed: dogembed});
+            await interaction.reply({embeds: [dogembed]});
         }
         else if (error === true){
-            const errorbed = new Discord.MessageEmbed()
+            const list = await fetch('https://dog.ceo/api/breeds/list/all')
+            .then(response=>response.json());
+            var records = []
+            
+            for(let i = 0; i < Object.keys(list.message).length; i++){
+                var namefield = Object.keys(list.message)[i];
+                var values = Object.values(list.message[namefield]);
+                records.push(
+                    `**${namefield}** ${values.length>0 ? " : ```"+values.join("\n")+"```" : "\u200B"}`
+                )
+            }
+
+            var fields = []
+
+            var tally = 0;
+            var carryon = "";
+            for(let i = 0; i < records.length;i++){
+                if(tally+records[i].length>=512){
+                    
+                    fields.push({
+                        name : "\u200B",
+                        value : carryon,
+                        inline : true
+                    })
+
+                    carryon = "";
+                    tally = 0;
+                }
+                carryon += records[i] + "\n"
+                tally += records[i].length
+            }
+            fields.push({
+                name : "\u200B",
+                value : carryon,
+                inline : true
+            })
+
+            const errorbed = new EmbedBuilder()
                 .setColor('#FF0000')
-                .setAuthor(dogpic)
                 .setTitle('You may need to refer to the list below for dog breeds')
                 .setURL('https://dog.ceo/dog-api/breeds-list')
-                .setFooter('Error!  •  This Bot Uses https://dog.ceo/api/')
-                .addFields(
-                    {name:'Breeds :',value:`**
-                    \`Affenpinscher, African, Airedale\` 
-                    \`Akita, Appenzeller, Australian\` 
-                    \`Basenji, Beagle, Bluetick\` 
-                    \`Borzoi, Bouvier, Boxer\` 
-                    \`Brabancon, Briard, Buhund\` 
-                    \`Bulldog, Bullterrier, Cairn\` 
-                    \`Cattledog, Chihuahua, Chow\` 
-                    \`Clumber, Cockapoo, Collie\` 
-                    \`Coonhound, Corgi, Cotondetulear\` 
-                    \`Dachshund, Dalmatian, Dane,\` 
-                    \`Deerhound, Dhole, Dingo,\` 
-                    \`Doberman, Elkhound, Entlebucher\` 
-                    \`Eskimo, Finnish, Frise,\` 
-                    \`Germanshepherd, Greyhound, Groenendael\` 
-                    \`Havanese, Hound,\` 
-                    \`Husky, Keeshond, Kelpie\` 
-                    \`Komondor, Kuvasz, Labradoodle\`
-                    **`},
-                    {name:'\u200b',value:`**
-                    \`Labrador, Leonberg, Lhasa\` 
-                    \`Malamute, Malinois, Maltese\` 
-                    \`Mastiff, Mexicanhairless, Mix\` 
-                    \`Mountain, Newfoundland, Otterhound\` 
-                    \`Ovcharka, Papillon, Pekinese\` 
-                    \`Pembroke, Pinscher, Pitbull\` 
-                    \`Pointer, Pomeranian, Poodle\` 
-                    \`Pug, Puggle, Pyrenees\` 
-                    \`Redbone, Retriever, Ridgeback\` 
-                    \`Rottweiler, Saluki, Samoyed\` 
-                    \`Schipperke, Schnauzer, Setter\` 
-                    \`Sheepdog, Shiba, Shihtzu\` 
-                    \`Spaniel, Springer, Stbernard\` 
-                    \`Terrier, Vizsla, Waterdog\` 
-                    \`Weimaraner, Whippet, Wolfhound\`
-                    **`},
-                    {name:'Sub-Breed :',value:`
-                    **Australian**   \`Shepherd\`
-                    **Buhund**   \`Norwegian\`
-                    **Bulldog**   \`Boston, English, French\`
-                    **Bullterrier**   \`Staffordshire\`
-                    **Cattledog**   \`Australian\`
-                    **Collie**   \`Border\`
-                    **Corgi**   \`Cardigan\`
-                    **Dane**   \`Great\`
-                    **Deerhound**   \`Scottish\`
-                    **Elkhound**   \`Norwegian\`
-                    **Finnish**   \`Lapphund\`
-                    **Frise**   \`Bichon\`
-                    **Greyhound**   \`Italian\`
-                    **Hound**   \`Afghan, Basset, Blood, English\`
-                    **Mastiff**   \`Bull, English, Tibetan\`
-                    `},
-                    {name:'\u200b',value:`
-                    **Mountain**   \`Bernese, Swiss\`
-                    **Ovcharka**   \`Caucasian\`
-                    **Pinscher**   \`Minature\`
-                    **Pointer**   \`German, Germanlonghair\`
-                    **Poodle**   \`Minature, Standard, Toy\`
-                    **Retriever**   \`Chesapeake, Curly, Flatcoated, Golden\`
-                    **Ridgeback**   \`Rhodesian\`
-                    **Schnauzer**   \`Giant, Minature\`
-                    **Setter**   \`English, Gordon, Irish\`
-                    **Sheepdog**   \`English, Shetland\`
-                    **Spaniel**   \`Blenheim, Brittany, Cocker, Irish, Japanese, Sussex, Welsh\`
-                    **Springer**   \`English\`
-                    **Terrier**   \`American, Australian, Bedlington, Border, Dandie, Fox, Irish, Kerryblue, Lakeland, Norfolk, Norwich, Patterdale, Russell, Scottish, Sealyham, Silky, Tibetan, Toy, Westhighland, Wheaten, Yorkshire\`
-                    **Waterdog**   \`Spanish\`
-                    **Wolfhound**   \`Irish\``}
-                )
+                .setFooter({text:'Error!  •  This Bot Uses https://dog.ceo/api/'})
+                .addFields(fields)
                 .setTimestamp();
-            message.channel.send({embed: errorbed});
+            await interaction.reply({embeds: [errorbed]});
         }
 
         
