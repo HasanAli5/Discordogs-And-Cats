@@ -16,7 +16,7 @@ module.exports =
         .setName('sub-breed')
         .setDescription('Sub-breed of Dog')
     ),
-    async execute(interaction,args)
+    async execute(interaction)
     {
         var error = false
         const breed = interaction.options.getString('breed') ?? undefined;
@@ -94,7 +94,6 @@ module.exports =
                 .setTimestamp();
             await interaction.reply({embeds: [errorbed]});
         }
-
         
     },
 };
