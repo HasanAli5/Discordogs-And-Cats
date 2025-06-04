@@ -1,4 +1,4 @@
 {
-    "token":"puttokenhere",
-    "clientId": "putbotclientidhere"
+    "token":"discordBotToken",
+    "clientId": "clientId"
 }
